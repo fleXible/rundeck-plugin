@@ -38,10 +38,6 @@ generate_config_property() {
 	local type=$(rerun_property_get "$option_dir" RUNDECK_PLUGIN_CONFIG_TYPE)
 	local scope=$(rerun_property_get "$option_dir" RUNDECK_PLUGIN_CONFIG_SCOPE)
 	local displayType=$(rerun_property_get "$option_dir" RUNDECK_PLUGIN_CONFIG_RENDERINGOPTIONS_DISPLAYTYPE)
-	local selectionAccessor=$(rerun_property_get "$option_dir" RUNDECK_PLUGIN_CONFIG_RENDERINGOPTIONS_SELECTIONACCESSOR)
-	local valueConversion=$(rerun_property_get "$option_dir" RUNDECK_PLUGIN_CONFIG_RENDERINGOPTIONS_STORAGE_PATH_AUTOMATIC_READ)
-	local storagePathRoot=$(rerun_property_get "$option_dir" RUNDECK_PLUGIN_CONFIG_RENDERINGOPTIONS_STORAGE_PATH_ROOT)
-	local groupName=$(rerun_property_get "$option_dir" RUNDECK_PLUGIN_CONFIG_RENDERINGOPTIONS_GROUPNAME)
 
 	if [[ "$arguments" == "false" ]]
 	then
@@ -68,21 +64,9 @@ generate_config_property() {
 		esac
 	fi
 	[[ -n "$scope" ]] && printf -- "        scope: %s\n" "$scope"
-	# Rendering options
-	[[ -n "${groupName:-}" || -n "${displayType:-}" || -n "${selectionAccessor:-}" ]] && {
+	[[ -n "$displayType" ]] && {
 		printf -- "        renderingOptions:\n"
-		[[ -n "$groupName" ]] && {
-			printf -- "          grouping: %s\n" "secondary"
-			printf -- "          groupName: %s\n" "$groupName"
-		}
-		[[ -n "$displayType" ]] && {
-			printf -- "          displayType: %s\n" "$displayType"
-		}
-		[[ -n "$selectionAccessor" ]] && {
-			printf -- "          selectionAccessor: %s\n" "$selectionAccessor"
-			printf -- "          valueConversion: %s\n" "$valueConversion"
-			printf -- "          storage-path-root: %s\n" "${storagePathRoot:-keys}"
-		}		
+		printf -- "          displayType: %s\n" "$displayType"
 	}
 }
 
@@ -114,7 +98,6 @@ create_build_hierarchy() {
 	local build_dir=$1
 	mkdir -pv "$build_dir"
 	mkdir -pv "$build_dir/contents"
-	mkdir -pv "$build_dir/resources"
 } 
 
 create_stubbs-archive() {
@@ -122,11 +105,11 @@ create_stubbs-archive() {
 	local version=$2
 	local dir=$3
 	rerun stubbs:archive \
-	--file "$BUILD_DIR/$NAME/contents/rerun.sh" \
+	--file $BUILD_DIR/$NAME/contents/rerun.sh \
 	--format sh \
 	--modules "$MODULES" \
-	--version "$VERSION" \
-	--template "$RERUN_MODULE_DIR/templates/archive"; # special template that populates answers file
+	--version $VERSION \
+	--template $RERUN_MODULE_DIR/templates/archive; # special template that populates answers file
 
 }
 
